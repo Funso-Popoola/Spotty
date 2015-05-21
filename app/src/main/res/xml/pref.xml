@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ListPreference
+        android:key="@string/venue_view_option_key"
+        android:title="@string/venue_view_option_title"
+        android:summary="@string/venue_view_option_summary"
+        android:entries="@array/entry_venue_view_options"
+        android:entryValues="@array/entry_values_venue_options"
+        android:dialogTitle="@string/venue_view_option_title"/>
+</PreferenceScreen>

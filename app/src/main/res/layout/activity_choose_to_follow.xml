@@ -1,0 +1,49 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.hoh.android.venuelocator.ChooseToFollowActivity"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/followSpinnerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="10"
+        android:gravity="center">
+
+        <ProgressBar
+            android:id="@+id/followSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"/>
+
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/choose_to_follow_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="9">
+
+        <fragment
+            android:name="com.hoh.android.venuelocator.ChooseUserToFollowFragment"
+            android:id="@+id/choose_to_follow_frag"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <Button
+            android:id="@+id/done_btn"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/done_text"/>
+
+    </LinearLayout>
+
+</LinearLayout>

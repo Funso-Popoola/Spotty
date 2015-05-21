@@ -1,0 +1,73 @@
+<resources>
+    <string name="app_name">Spotty</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_log_in">LogInActivity</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_venue_details">Venue</string>
+    <string name="title_activity_profile">Profile</string>
+    <string name="title_activity_choose_to_follow">ChooseToFollow</string>
+
+    <string name="login_text">Log In</string>
+    <string name="logout_text">Log Out</string>
+    <string name="profile_text">Profile</string>
+    <string name="following_text">Following</string>
+    <string name="unfollow_text">Remove</string>
+
+    <string name="done_text">DONE</string>
+
+    <string name="dummy_user_name">user_test</string>
+    <string name="dummy_user_email">foo@gmail.com</string>
+
+    <string name="add_leader_btn">Follow More</string>
+    <string name="profile_img_text">Profile Image</string>
+
+    <string name="full_name_text">Full Name: </string>
+    <string name="email_text">Email: </string>
+
+    <string name="location_text">Location: </string>
+    <string name="date_text">Date: </string>
+    <string name="checked_in_at_text">Checked In At</string>
+
+    <string name="activity_dummy_text">Checked In</string>
+    <string name="date_dummy_text">01/02/2015</string>
+    <string name="location_dummy_text">Chemical Eng Lecture Theatre</string>
+
+    <string name="venue_type_dummy_text">Lecture Theatre</string>
+    <string name="venue_address_dummy_text">Chemical Eng Lecture Theatre</string>
+    <string name="venue_distance_dummy_text">1km From You</string>
+
+    <string name="action_search">Search Venues</string>
+    <string name="title_activity_settings">SettingsActivity</string>
+
+    <string name="venue_view_option_key">VenueViewType</string>
+    <string name="venue_view_option_title">Venue View Type</string>
+    <string name="venue_view_option_summary">Choose whether to View Venue on map or not</string>
+
+    <string name="social_login_text">Social Log In</string>
+    <string name="login_instructions">This app will not to post to Google+ without your approval; signing in with google plus is safe and easier!</string>
+
+    <string name="venue_heading_dummy_text">Chemical Engineering LT</string>
+    <string name="recent_activities_text">Recent Activities</string>
+
+    <string-array name="entry_venue_view_options">
+        <item>List View</item>
+        <item>Map View</item>
+    </string-array>
+
+    <string-array name="entry_values_venue_options">
+        <item>list</item>
+        <item>map</item>
+    </string-array>
+
+    <string name="pref_logged_in_key">is_logged_in</string>
+    <string name="pref_user_id_key">user_id</string>
+    <string name="pref_username_key">username</string>
+    <string name="pref_user_email_key">user_email</string>
+    <string name="pref_user_img_url_key">user_img_url</string>
+    <string name="pref_user_google_plus_profile_key">plus_profile</string>
+    <string name="pref_view_type_key">view_type</string>
+</resources>
