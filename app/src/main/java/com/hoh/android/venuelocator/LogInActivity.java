@@ -1,8 +1,10 @@
 package com.hoh.android.venuelocator;
 
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
@@ -46,6 +48,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.hoh.android.venuelocator.data.VenueLocatorContract.UserEntry;
 
 
 public class LogInActivity extends FragmentActivity implements
@@ -159,7 +163,7 @@ public class LogInActivity extends FragmentActivity implements
     @Override
     public void onConnected(Bundle bundle) {
         signInBtnClicked = false;
-        Toast.makeText(this, "You're now connected!", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "You're now Logged In!", Toast.LENGTH_LONG).show();
         retrieveUserProfile();
 
         //indicate that this user is logged-in in the sharedPreferences
@@ -171,6 +175,23 @@ public class LogInActivity extends FragmentActivity implements
     }
 
     public void uploadUserData(){
+        ContentValues userContentValues = new ContentValues();
+        userContentValues.put(UserEntry.COLUMN_USER_ID, preferenceManager.getUserId());
+        userContentValues.put(UserEntry.COLUMN_USERNAME, preferenceManager.getUserName());
+        userContentValues.put(UserEntry.COLUMN_EMAIL, preferenceManager.getUserEmail());
+        userContentValues.put(UserEntry.COLUMN_IMG_URL, preferenceManager.getUserImgUrl());
+        userContentValues.put(UserEntry.COLUMN_GOOGLE_PLUS_PROFILE, preferenceManager.getUserPlusProfile());
+        userContentValues.put(UserEntry.COLUMN_CREATED_AT, System.currentTimeMillis());
+        userContentValues.put(UserEntry.COLUMN_MODIFIED_AT, System.currentTimeMillis());
+        userContentValues.put(UserEntry.COLUMN_ACTIVE_STATUS, 1);
+
+        Uri userUri = getContentResolver().insert(
+                UserEntry.CONTENT_URI,
+                userContentValues
+        );
+
+        Log.i(LOG_TAG, "User details inserted into DB ===> " + userUri);
+
         try {
             PostRequest request = new PostRequest(new URL(Utility.USER_URL));
             List<NameValuePair> nameValuePairs = new ArrayList<>();
@@ -178,7 +199,7 @@ public class LogInActivity extends FragmentActivity implements
             nameValuePairs.add(new BasicNameValuePair("username", preferenceManager.getUserName()));
             nameValuePairs.add(new BasicNameValuePair("email", preferenceManager.getUserEmail()));
             nameValuePairs.add(new BasicNameValuePair("profile_image_url", preferenceManager.getUserImgUrl()));
-            nameValuePairs.add(new BasicNameValuePair("image_alt_text", preferenceManager.getUserPlusProfile()));
+            nameValuePairs.add(new BasicNameValuePair("google_plus_profile", preferenceManager.getUserPlusProfile()));
 
             request.setData(nameValuePairs);
             PostManTask postManTask = new PostManTask(this);
@@ -200,7 +221,7 @@ public class LogInActivity extends FragmentActivity implements
         if (!intentInProgress) {
             // Store the ConnectionResult so that we can use it later when the user clicks
             // 'sign-in'.
-            Log.i(LOG_TAG, "ConnectionFailed");
+            Log.i(LOG_TAG, "Connection Failed");
             this.connectionResult = connectionResult;
 
             if (signInBtnClicked) {
@@ -245,7 +266,7 @@ public class LogInActivity extends FragmentActivity implements
             preferenceManager.setUserImgUrl(personPhoto);
             preferenceManager.setUserPlusProfile(personGooglePlusProfile);
 
-            Toast.makeText(this, "name: " + personName + " photo: " + personPhoto + " profile: " + personGooglePlusProfile, Toast.LENGTH_LONG).show();
+//            Toast.makeText(this, "name: " + personName + " photo: " + personPhoto + " profile: " + personGooglePlusProfile, Toast.LENGTH_LONG).show();
             (new FetchUserEmailTask()).execute();
 
         }

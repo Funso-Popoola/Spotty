@@ -54,7 +54,7 @@ public class VenueRecentActivityListFragment extends Fragment {
 
         ListView listView = (ListView) root.findViewById(R.id.venue_recent_activity_list_view);
 
-        RecentActivityListAdapter adapter = new RecentActivityListAdapter(getActivity());
+        RecentActivityListAdapter adapter = new RecentActivityListAdapter(getActivity(), null, 0);
 
         listView.setAdapter(adapter);
         return root;

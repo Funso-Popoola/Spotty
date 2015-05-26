@@ -8,9 +8,8 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:background="@color/wallet_holo_blue_light"
-        android:layout_weight="1">
+        android:layout_height="wrap_content"
+        android:background="@color/wallet_holo_blue_light">
 
         <TextView
             android:id="@+id/venue_details_heading_tv"
@@ -24,54 +23,75 @@
     </LinearLayout>
 
 
-    <ScrollView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="9">
+        android:layout_weight="9"
+        android:orientation="vertical">
 
-        <LinearLayout
+        <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/venue_details_map"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:name="com.google.android.gms.maps.MapFragment"/>
+
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:text="@string/recent_activities_text"
+            android:textSize="@dimen/abc_text_size_subhead_material"/>
+
+        <ListView
+            android:id="@+id/recent_activities_list_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-                android:id="@+id/venue_details_map"
-                android:layout_width="match_parent"
-                android:layout_height="300dp"
-                android:name="com.google.android.gms.maps.MapFragment"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:text="@string/recent_activities_text"
-                android:textSize="@dimen/abc_text_size_subhead_material"/>
-
-            <LinearLayout
-                android:id="@+id/recent_activities_list_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
 
 
+        </ListView>
 
-            </LinearLayout>
-            <LinearLayout
-                android:id="@+id/venue_recent_spinner_layout"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/venue_recent_spinner_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center">
 
-                <ProgressBar
-                    android:id="@+id/venue_recent_spinner"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-            </LinearLayout>
+        <ProgressBar
+            android:id="@+id/spinner"
+            style="@style/Widget.AppCompat.Spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"/>
 
-        </LinearLayout>
+    </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        style="?android:attr/buttonBarStyle">
 
+        <Button
+            android:id="@+id/venue_check_in_btn"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="@string/venue_check_in_btn_label"
+            style="?android:attr/buttonBarButtonStyle"/>
 
-    </ScrollView>
+        <Button
+            android:id="@+id/venue_check_out_btn"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="@string/venue_check_out_btn_label"
+            style="?android:attr/buttonBarButtonStyle"/>
+    </LinearLayout>
+
 
 
 </LinearLayout>

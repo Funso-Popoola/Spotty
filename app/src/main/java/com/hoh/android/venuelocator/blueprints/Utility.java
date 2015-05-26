@@ -22,9 +22,7 @@ public class Utility {
     public static final String API_KEY = "AIzaSyCey2nTKJ3NrZl6sgMVhK6qg3sMDq25WHA";
     public static final String BASE_URL = "http://vlback-hoh.rhcloud.com/api";
     public static final String USER_URL =  BASE_URL + "/users";
-    public static final String USER_AUTH = BASE_URL + "/user_auth";
     public static final String CHECKING_URL = BASE_URL + "/checking";
-    public static final String IMAGES_URL = BASE_URL + "/images";
     public static final String USER_FOLLOW_URL = BASE_URL + "/user_follow";
     public static final String VENUE_TYPES_URL = BASE_URL + "/venue_types";
     public static final String VENUE_URL = BASE_URL + "/venues";

@@ -1,11 +1,12 @@
 package com.hoh.android.venuelocator;
 
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.support.v4.app.FragmentActivity;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,24 +17,34 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 
 import com.hoh.android.venuelocator.async.FetchDataTask;
+import com.hoh.android.venuelocator.async.PostManTask;
+import com.hoh.android.venuelocator.async.PostRequest;
 import com.hoh.android.venuelocator.blueprints.CustomPreferenceManager;
 import com.hoh.android.venuelocator.blueprints.OnDownloadFinished;
 import com.hoh.android.venuelocator.blueprints.OnFragmentInteractionListener;
+import com.hoh.android.venuelocator.blueprints.OnPostFinish;
+import com.hoh.android.venuelocator.blueprints.RecentVenueActivityItem;
 import com.hoh.android.venuelocator.blueprints.UserItem;
 import com.hoh.android.venuelocator.blueprints.UserToFollowListAdapter;
 import com.hoh.android.venuelocator.blueprints.Utility;
+import com.hoh.android.venuelocator.data.VenueLocatorContract.UserEntry;
+import com.hoh.android.venuelocator.data.VenueLocatorContract.LeaderFollowerEntry;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 
 public class ChooseToFollowActivity extends FragmentActivity implements
-        OnFragmentInteractionListener, OnDownloadFinished{
+        OnFragmentInteractionListener, OnDownloadFinished, OnPostFinish{
 
     private final String LOG_TAG = ChooseToFollowActivity.class.getSimpleName();
     private CustomPreferenceManager preferenceManager;
@@ -58,13 +69,71 @@ public class ChooseToFollowActivity extends FragmentActivity implements
         doneButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                List<UserItem> chosenUsers = UserToFollowListAdapter.chosenUsers;
+                List<Integer> chosenUsers = UserToFollowListAdapter.chosenUsers;
+
+                //insert all the chosen users into the LeaderFollowers' table with the active user
+                // as the follower
+
+                insertLeaders(chosenUsers);
+                uploadLeaders(chosenUsers);
+
                 Intent intent = new Intent(getApplication(), ProfileActivity.class);
+                startActivity(intent);
+                finish();
             }
         });
 
-        setProgressBarIndeterminateVisibility(true);
+//        setProgressBarIndeterminateVisibility(true);
         fetchAllUsers();
+    }
+
+    public void uploadLeaders(List<Integer> leaders){
+        for (int i = 0; i < leaders.size(); i++){
+            try {
+                PostRequest request = new PostRequest(new URL(Utility.USER_FOLLOW_URL));
+                List<NameValuePair> nameValuePairs = new ArrayList<>();
+                nameValuePairs.add(new BasicNameValuePair("action", "insert"));
+                nameValuePairs.add(new BasicNameValuePair("user_id", preferenceManager.getUserId() + ""));
+                nameValuePairs.add(new BasicNameValuePair("leader_id",leaders.get(i) + ""));
+
+                request.setData(nameValuePairs);
+                PostManTask postManTask = new PostManTask(this);
+                postManTask.execute(request);
+
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+    public void insertLeaders(List<Integer> leaders){
+        Vector<ContentValues> contentValuesVector = new Vector<>();
+        ContentValues contentValues;
+
+        for (int i = 0; i < leaders.size(); i++){
+            contentValues = new ContentValues();
+            contentValues.put(LeaderFollowerEntry.COLUMN_LEADER_ID, leaders.get(i));
+            contentValues.put(LeaderFollowerEntry.COLUMN_FOLLOWER_ID, preferenceManager.getUserId());
+            contentValues.put(LeaderFollowerEntry.COLUMN_CREATED_AT, System.currentTimeMillis());
+            contentValues.put(LeaderFollowerEntry.COLUMN_MODIFIED_AT, System.currentTimeMillis());
+            contentValues.put(LeaderFollowerEntry.COLUMN_ACTIVE_STATUS, 1);
+
+            contentValuesVector.add(contentValues);
+        }
+
+        int numOfRowsAffected = 0;
+
+        if (contentValuesVector.size() > 0){
+            ContentValues [] contentValuesArr = new ContentValues[contentValuesVector.size()];
+            contentValuesVector.toArray(contentValuesArr);
+            numOfRowsAffected = getContentResolver().bulkInsert(
+                    LeaderFollowerEntry.CONTENT_URI,
+                    contentValuesArr
+            );
+        }
+
+        Log.i(LOG_TAG, "Number of LEADERS inserted ===> " + numOfRowsAffected);
     }
 
 
@@ -72,7 +141,7 @@ public class ChooseToFollowActivity extends FragmentActivity implements
 
         FetchDataTask fetchDataTask = new FetchDataTask(this, spinnerLayout);
         userUrl = Utility.USER_URL + "/" + preferenceManager.getUserId();
-        fetchDataTask.execute();
+        fetchDataTask.execute(userUrl);
     }
 
     @Override
@@ -112,10 +181,11 @@ public class ChooseToFollowActivity extends FragmentActivity implements
 
         spinnerLayout.setVisibility(View.GONE);
 
-        setProgressBarIndeterminateVisibility(false);
+//        setProgressBarIndeterminateVisibility(false);
         Log.i(LOG_TAG, responseString);
 
         userItemList.clear();
+
 
         if (url.contains(Utility.USER_URL)){
 
@@ -124,17 +194,55 @@ public class ChooseToFollowActivity extends FragmentActivity implements
             UserItem userItem;
             JSONObject userObject;
 
-            for (int i = 0, limit = notFollowedArr.length(); i < limit; i++){
+            int count = notFollowedArr.length();
+            Vector<ContentValues> contentValuesVector = new Vector<ContentValues>(count);
+            ContentValues contentValues;
+
+            int userId;
+            String username, email, image_url, google_profile_url;
+
+            for (int i = 0; i < count; i++){
                 userObject = notFollowedArr.getJSONObject(i);
+
+                userId = Integer.parseInt(userObject.getString("user_id"));
+                username = userObject.getString("username");
+                email = userObject.getString("email");
+                image_url = userObject.getString("image_url");
+                google_profile_url = userObject.getString("google_plus_profile");
                 userItem = new UserItem(
-                        userObject.getString("username"),
-                        userObject.getString("email"),
-                        userObject.getString("image_url")
+                        username,
+                        email,
+                        image_url
                 );
                 userItemList.add(userItem);
+
+                contentValues = new ContentValues();
+                contentValues.put(UserEntry.COLUMN_USER_ID, userId);
+                contentValues.put(UserEntry.COLUMN_USERNAME, username);
+                contentValues.put(UserEntry.COLUMN_EMAIL, email);
+                contentValues.put(UserEntry.COLUMN_IMG_URL, image_url);
+                contentValues.put(UserEntry.COLUMN_GOOGLE_PLUS_PROFILE, google_profile_url);
+                contentValues.put(UserEntry.COLUMN_CREATED_AT, System.currentTimeMillis());
+                contentValues.put(UserEntry.COLUMN_MODIFIED_AT, System.currentTimeMillis());
+                contentValues.put(UserEntry.COLUMN_ACTIVE_STATUS, 1);
+
+                contentValuesVector.add(contentValues);
             }
 
-            getFragmentManager().beginTransaction().
+            int numOfRowsInserted = 0;
+
+            if ( contentValuesVector.size() > 0 ) {
+                ContentValues [] contentValuesArr = new ContentValues[contentValuesVector.size()];
+                contentValuesVector.toArray(contentValuesArr);
+                numOfRowsInserted = getContentResolver().bulkInsert(
+                        UserEntry.CONTENT_URI,
+                        contentValuesArr
+                );
+            }
+
+            Log.i(LOG_TAG, "Number of USERS inserted ===> " + numOfRowsInserted);
+
+            getSupportFragmentManager().beginTransaction().
                     replace(R.id.choose_to_follow_container, ChooseUserToFollowFragment.newInstance(userItemList))
                     .commit();
 
@@ -144,5 +252,15 @@ public class ChooseToFollowActivity extends FragmentActivity implements
     @Override
     public void setImageBitmap(String url, Bitmap bitmap) {
 
+    }
+
+    @Override
+    public Context getContext() {
+        return this;
+    }
+
+    @Override
+    public void parsePostResponse(String respondString) throws JSONException {
+        Log.i(LOG_TAG, respondString);
     }
 }

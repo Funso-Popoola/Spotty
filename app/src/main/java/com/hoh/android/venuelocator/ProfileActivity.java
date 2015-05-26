@@ -1,5 +1,6 @@
 package com.hoh.android.venuelocator;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -48,7 +49,7 @@ public class ProfileActivity extends FragmentActivity implements OnFragmentInter
         followMoreButton = (Button) findViewById(R.id.follow_more_btn);
 
         fullNameTextView.setText(fullNameTextView.getText() + " " + preferenceManager.getUserName());
-        emailTextView.setText(emailTextView.getText() + " " + preferenceManager.getUserEmail());
+        updateEmail();
 
         try{
             final URL url = new URL(preferenceManager.getUserImgUrl());
@@ -67,6 +68,19 @@ public class ProfileActivity extends FragmentActivity implements OnFragmentInter
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateEmail();
+    }
+
+    public void updateEmail(){
+        String email = "Not yet available";
+        if (preferenceManager.getUserEmail() != null){
+            email = preferenceManager.getUserEmail();
+        }
+        emailTextView.setText(getString(R.string.email_text) + " " + email);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -122,5 +136,10 @@ public class ProfileActivity extends FragmentActivity implements OnFragmentInter
         if (url.equals(preferenceManager.getUserImgUrl())){
             profileImageView.setImageBitmap(bitmap);
         }
+    }
+
+    @Override
+    public Context getContext() {
+        return this;
     }
 }

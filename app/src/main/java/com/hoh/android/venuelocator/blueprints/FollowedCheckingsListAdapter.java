@@ -1,71 +1,54 @@
 package com.hoh.android.venuelocator.blueprints;
 
 import android.content.Context;
-import android.graphics.drawable.BitmapDrawable;
+import android.database.Cursor;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.widget.CursorAdapter;
 
 import com.hoh.android.venuelocator.R;
-
-import java.util.ArrayList;
-import java.util.List;
-
+import com.hoh.android.venuelocator.data.VenueLocatorContract.CheckingEntry;
+import com.hoh.android.venuelocator.data.VenueLocatorContract.UserEntry;
+import com.hoh.android.venuelocator.data.VenueLocatorContract.VenueEntry;
 /**
- * Created by funso on 3/5/15.
+ * Created by funso on 3/5/15.Android
  */
-public class FollowedCheckingsListAdapter extends BaseAdapter {
+public class FollowedCheckingsListAdapter extends CursorAdapter {
 
     private Context context;
-    private List<RecentVenueActivityItem> followedCheckingsItems;
 
-    public FollowedCheckingsListAdapter(Context context){
+    public FollowedCheckingsListAdapter(Context context, Cursor cursor, int flag){
+        super(context, cursor, flag);
         this.context = context;
-        this.followedCheckingsItems = new ArrayList<>();
-    }
-
-    public void add(RecentVenueActivityItem item){
-        followedCheckingsItems.add(item);
     }
 
     @Override
-    public int getCount() {
-        return followedCheckingsItems.size();
+    public View newView(Context context, Cursor cursor, ViewGroup parent) {
+        View view = (LayoutInflater.from(context)).inflate(R.layout.followed_checkings_item, parent, false);
+        FollowedCheckingsViewHolder viewHolder = new FollowedCheckingsViewHolder(view, this.context);
+        view.setTag(viewHolder);
+        return view;
     }
 
     @Override
-    public Object getItem(int position) {
-        return followedCheckingsItems.get(position);
-    }
+    public void bindView(View view, Context context, Cursor cursor) {
 
-    @Override
-    public long getItemId(int position) {
-        return position;
-    }
+        if (cursor != null && !cursor.isClosed()){
+            FollowedCheckingsViewHolder viewHolder = (FollowedCheckingsViewHolder) view.getTag();
 
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-
-        RecentVenueActivityItem item = followedCheckingsItems.get(position);
-
-        View view = convertView;
-        if (view == null){
-            view = (LayoutInflater.from(context)).inflate(R.layout.followed_checkings_item, parent, false);
+            viewHolder.downloadUserImage(cursor.getString(
+                    cursor.getColumnIndex(UserEntry.TABLE_NAME + "." + UserEntry.COLUMN_IMG_URL)));
+            viewHolder.userActivityTextView.setText(cursor.getString(
+                    cursor.getColumnIndex(VenueEntry.TABLE_NAME + "." + VenueEntry.COLUMN_ADDRESS)
+            ));
+            viewHolder.userActivityTextView.setText(cursor.getString(
+                    cursor.getColumnIndex(CheckingEntry.TABLE_NAME + "." + CheckingEntry.COLUMN_CHECK_TYPE)
+            ));
+            viewHolder.userActivityTimeStamp.setText(cursor.getString(
+                    cursor.getColumnIndex(CheckingEntry.TABLE_NAME + "." + CheckingEntry.COLUMN_CREATED_AT)
+            ));
         }
 
-        final ImageView userProfileImage = (ImageView)view.findViewById(R.id.followed_user_profile_image);
-        final TextView userActivityTextView = (TextView)view.findViewById(R.id.followed_activity_tv);
-        final TextView userLocationTextView = (TextView)view.findViewById(R.id.followed_checking_venue_tv);
-        final TextView userActivityTimeStamp = (TextView)view.findViewById(R.id.followed_time_stamp_tv);
-
-        //userProfileImage.setImageDrawable(new BitmapDrawable());
-        //userActivityTextView.setText("");
-        userLocationTextView.setText(item.getVenue().getAddress());
-        userActivityTimeStamp.setText(item.getTimeStamp());
-
-        return view;
     }
 }

@@ -1,49 +1,42 @@
 package com.hoh.android.venuelocator;
 
 import android.app.Activity;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
+import com.hoh.android.venuelocator.blueprints.CustomPreferenceManager;
 import com.hoh.android.venuelocator.blueprints.UserFollowedItem;
 import com.hoh.android.venuelocator.blueprints.UserFollowedListAdapter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.hoh.android.venuelocator.blueprints.OnFragmentInteractionListener;
+import com.hoh.android.venuelocator.data.VenueLocatorContract;
 
-public class UserFollowedFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+public class UserFollowedFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private static final String LOG_TAG = UserFollowedFragment.class.getSimpleName();
+    private static final int LOADER_ID = 4;
+
+    private UserFollowedListAdapter adapter;
+    private CustomPreferenceManager preferenceManager;
 
     private OnFragmentInteractionListener mListener;
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment UserFollowedFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static UserFollowedFragment newInstance(String param1, String param2) {
+    public static UserFollowedFragment newInstance() {
         UserFollowedFragment fragment = new UserFollowedFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
         return fragment;
     }
 
@@ -54,10 +47,6 @@ public class UserFollowedFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
@@ -66,25 +55,31 @@ public class UserFollowedFragment extends Fragment {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_user_followed, container, false);
 
+        preferenceManager = new CustomPreferenceManager(getActivity());
+        adapter = new UserFollowedListAdapter(getActivity(), null, 0);
         // find the list view
         ListView userFollowedListView = (ListView) rootView.findViewById(R.id.user_followed_list);
 
         // create a UserFollowedListAdapter
-        UserFollowedListAdapter adapter = new UserFollowedListAdapter(getActivity());
-
         List<UserFollowedItem> userFollowedItems = new ArrayList<>();
 
         UserFollowedItem item;
 
-        for (int i = 0; i < 6; i++){
-            item = new UserFollowedItem("User", "foo@foo.com");
-            userFollowedItems.add(item);
-            adapter.add(item);
-        }
+//        for (int i = 0; i < 6; i++){
+//            item = new UserFollowedItem("User", "foo@foo.com");
+//            userFollowedItems.add(item);
+//            adapter.add(item);
+//        }
 
         userFollowedListView.setAdapter(adapter);
 
         return rootView;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        getLoaderManager().initLoader(LOADER_ID, null, this);
     }
 
     public void loadUserFollowed(){
@@ -115,5 +110,35 @@ public class UserFollowedFragment extends Fragment {
         mListener = null;
     }
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        Log.i("USER FOLLOWED FRAGMENT", " LOADER CREATED");
+        int userId = preferenceManager.getUserId();
+        if (userId != -1){
+            return new CursorLoader(
+                    getActivity(),
+                    VenueLocatorContract.LeaderFollowerEntry.buildFollowerLeaderUriWithFollowerId(preferenceManager.getUserId()),
+                    null,
+                    null,
+                    null,
+                    null
+            );
+        }
+        else{
+            return null;
+        }
+    }
 
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        if (!data.isClosed()){
+            Log.i(LOG_TAG, " DATA LOADED ====> " + Arrays.toString(data.getColumnNames()) + " COUNT " + data.getCount());
+            adapter.swapCursor(data);
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        adapter.swapCursor(null);
+    }
 }

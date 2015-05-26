@@ -1,10 +1,12 @@
 package com.hoh.android.venuelocator.async;
 
+import android.content.Context;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.hoh.android.venuelocator.blueprints.OnDownloadFinished;
 import com.hoh.android.venuelocator.blueprints.Utility;
@@ -36,7 +38,7 @@ public class FetchDataTask extends AsyncTask<String, Void, String> {
 
     @Override
     protected void onPreExecute() {
-        this.spinnerLayout.setVisibility(View.VISIBLE);
+//        this.spinnerLayout.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -62,6 +64,7 @@ public class FetchDataTask extends AsyncTask<String, Void, String> {
             fetchedDataString = Utility.getNetworkResponse(inputStream);
         }
         catch (IOException ioEx){
+//            Toast.makeText(callback.getContext(), "Network Error!", Toast.LENGTH_LONG).show();
             ioEx.printStackTrace();
         }
         finally {

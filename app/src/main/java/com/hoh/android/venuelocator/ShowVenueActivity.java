@@ -1,15 +1,19 @@
 package com.hoh.android.venuelocator;
 
 import android.app.ActionBar;
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.location.Location;
 import android.net.Uri;
-import android.preference.PreferenceManager;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,7 +30,9 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.plus.Plus;
 import com.hoh.android.venuelocator.async.FetchDataTask;
 import com.hoh.android.venuelocator.blueprints.CustomPreferenceManager;
+import com.hoh.android.venuelocator.blueprints.FollowedCheckingsListAdapter;
 import com.hoh.android.venuelocator.blueprints.MovesItem;
+import com.hoh.android.venuelocator.blueprints.MovesListAdapter;
 import com.hoh.android.venuelocator.blueprints.OnDownloadFinished;
 import com.hoh.android.venuelocator.blueprints.OnFragmentInteractionListener;
 import com.hoh.android.venuelocator.blueprints.RecentVenueActivityItem;
@@ -35,6 +41,10 @@ import com.hoh.android.venuelocator.blueprints.UserItem;
 import com.hoh.android.venuelocator.blueprints.Utility;
 import com.hoh.android.venuelocator.blueprints.VenueItem;
 import com.hoh.android.venuelocator.blueprints.VenueListAdapter;
+import com.hoh.android.venuelocator.data.VenueLocatorContract;
+import com.hoh.android.venuelocator.data.VenueLocatorContract.CheckingEntry;
+import com.hoh.android.venuelocator.data.VenueLocatorContract.UserEntry;
+import com.hoh.android.venuelocator.data.VenueLocatorContract.VenueEntry;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -42,6 +52,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 public class ShowVenueActivity extends FragmentActivity implements ActionBar.TabListener,
         OnFragmentInteractionListener,
@@ -71,6 +82,9 @@ public class ShowVenueActivity extends FragmentActivity implements ActionBar.Tab
     private Button profileViewButton;
 
     private List<VenueItem> venueItemList;
+    private VenueListAdapter venueListAdapter;
+    private MovesListAdapter movesListAdapter;
+    private FollowedCheckingsListAdapter followedCheckingsListAdapter;
     private List<MovesItem> movesItemList;
     private List<RecentVenueActivityItem> followedVenueActivityItemList;
 
@@ -101,7 +115,12 @@ public class ShowVenueActivity extends FragmentActivity implements ActionBar.Tab
         movesItemList = new ArrayList<>();
         followedVenueActivityItemList = new ArrayList<>();
 
-        loadDummyData();
+        // initialize the adapters
+        venueListAdapter = new VenueListAdapter(this, null, 0);
+        movesListAdapter = new MovesListAdapter(this, null, 0);
+        followedCheckingsListAdapter = new FollowedCheckingsListAdapter(this, null, 0);
+
+//        loadDummyData();
 
         buildGoogleApiClient();
 
@@ -121,18 +140,21 @@ public class ShowVenueActivity extends FragmentActivity implements ActionBar.Tab
                 if (!isLoggedIn){
                     nextClass = LogInActivity.class;
                 }
+
                 startActivity(new Intent(getApplication(), nextClass));
             }
         });
 
         spinnerLayout = (LinearLayout)findViewById(R.id.spinnerLayout);
+        spinnerLayout.setVisibility(View.GONE);
 
+        finishInitialization();
     }
 
     public void finishInitialization(){
 
         // create the adapter
-        pagerAdapter = new ShowVenuePagerAdapter(getSupportFragmentManager(), venueItemList, movesItemList, followedVenueActivityItemList);
+        pagerAdapter = new ShowVenuePagerAdapter(getSupportFragmentManager(), venueListAdapter, movesListAdapter, followedCheckingsListAdapter);
 
         final ActionBar actionBar = getActionBar();
 
@@ -175,7 +197,10 @@ public class ShowVenueActivity extends FragmentActivity implements ActionBar.Tab
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
+                .addApi(Plus.API)
+                .addScope(Plus.SCOPE_PLUS_LOGIN)
                 .build();
+
     }
 
 
@@ -218,13 +243,30 @@ public class ShowVenueActivity extends FragmentActivity implements ActionBar.Tab
     protected void onStart() {
         super.onStart();
 
-        if (!initialized)
-            fetchAllVenues();
+//        if (!initialized)
+//            fetchAllVenues();
+        updateFooterButton();
+        if (preferenceManager.getCurrentLat() == -1 || preferenceManager.getCurrentLng() == -1){
+            Log.i(LOG_TAG, "Getting the Location");
+            googleApiClient.connect();
+        }
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateFooterButton();
+    }
+
+    public void updateFooterButton(){
         final boolean isLoggedIn = preferenceManager.isLoggedIn();
 
         if (!isLoggedIn){
             profileViewButton.setText(R.string.login_text);
+        }
+        else{
+            profileViewButton.setText(R.string.profile_text);
         }
 
 
@@ -233,19 +275,13 @@ public class ShowVenueActivity extends FragmentActivity implements ActionBar.Tab
             public void onClick(View v) {
                 Class nextClass = ProfileActivity.class;
 
-                if (!isLoggedIn){
+                if (!isLoggedIn) {
                     nextClass = LogInActivity.class;
                 }
                 startActivity(new Intent(getApplication(), nextClass));
             }
         });
-
-        Log.i(LOG_TAG, "Getting the Location");
-        googleApiClient.connect();
-        // retrieve the list of venues
-
     }
-
     @Override
     protected void onStop() {
         super.onStop();
@@ -262,12 +298,18 @@ public class ShowVenueActivity extends FragmentActivity implements ActionBar.Tab
         switch (position){
             case NEAR_BY:
                 fetchAllVenues();
+//                getSupportLoaderManager().restartLoader(VENUE_LOADER_ID, null, this);
+                spinnerLayout.setVisibility(View.GONE);
                 break;
             case MOVES:
                 fetchMoves();
+//                getSupportLoaderManager().restartLoader(VENUE_LOADER_ID, null, this);
+                spinnerLayout.setVisibility(View.GONE);
                 break;
             case FOLLOWED:
                 fetchLeaders();
+//                getSupportLoaderManager().restartLoader(VENUE_LOADER_ID, null, this);
+                spinnerLayout.setVisibility(View.GONE);
                 break;
             default:
                 Log.i(LOG_TAG, "UNKNOWN TAB SELECTED ");
@@ -296,13 +338,14 @@ public class ShowVenueActivity extends FragmentActivity implements ActionBar.Tab
 
        if (adapter instanceof VenueListAdapter){
            Intent intent = new Intent(getApplicationContext(), VenueDetailsActivity.class);
-           VenueItem venueItem = venueItemList.get(position);
-           intent.putExtra(VenueItem.VENUE_ID, venueItem.getId());
-           intent.putExtra(VenueItem.VENUE_NAME, venueItem.getName());
-           intent.putExtra(VenueItem.VENUE_ADDRESS, venueItem.getAddress());
-           intent.putExtra(VenueItem.VENUE_PLACE_ID, venueItem.getPlaceId());
-           intent.putExtra(VenueItem.VENUE_LAT, venueItem.getLatitude());
-           intent.putExtra(VenueItem.VENUE_LNG, venueItem.getLongitude());
+           Cursor cursor = (Cursor) adapter.getItem(position);
+           intent.putExtra(VenueItem.VENUE_INTERNAL_ID, cursor.getLong(cursor.getColumnIndex(VenueEntry._ID)));
+           intent.putExtra(VenueItem.VENUE_ID, cursor.getLong(cursor.getColumnIndex(VenueEntry.COLUMN_VENUE_ID)));
+           intent.putExtra(VenueItem.VENUE_NAME, cursor.getString(cursor.getColumnIndex(VenueEntry.COLUMN_NAME)));
+           intent.putExtra(VenueItem.VENUE_ADDRESS, cursor.getString(cursor.getColumnIndex(VenueEntry.COLUMN_ADDRESS)));
+           intent.putExtra(VenueItem.VENUE_PLACE_ID, cursor.getString(cursor.getColumnIndex(VenueEntry.COLUMN_PLACE_ID)));
+           intent.putExtra(VenueItem.VENUE_LAT, cursor.getDouble(cursor.getColumnIndex(VenueEntry.COLUMN_LAT)));
+           intent.putExtra(VenueItem.VENUE_LNG, cursor.getDouble(cursor.getColumnIndex(VenueEntry.COLUMN_LNG)));
 
            startActivity(intent);
        }
@@ -319,6 +362,9 @@ public class ShowVenueActivity extends FragmentActivity implements ActionBar.Tab
         }
         else if (url.equals(Utility.VENUE_URL)){
             parseVenue(responseString);
+        }
+        else if (url.equals(Utility.CHECKING_URL)){
+
         }
     }
 
@@ -340,7 +386,7 @@ public class ShowVenueActivity extends FragmentActivity implements ActionBar.Tab
             placeId = resultObject.getString(PLACE_ID_KEY);
             vicinity = resultObject.getString(VICINITY_KEY);
 
-            venueItem = new VenueItem(1, "", vicinity, placeId, lat, lng);
+            venueItem = new VenueItem(1,1, "", vicinity, placeId, lat, lng);
             venueItemList.add(venueItem);
         }
         Log.i(LOG_TAG, venueItemList.toString());
@@ -366,7 +412,7 @@ public class ShowVenueActivity extends FragmentActivity implements ActionBar.Tab
             address = resultObject.getString(FORMATTED_ADDRESS);
             name = resultObject.getString(NAME_KEY);
 
-            venueItem = new VenueItem(1, "", address + " (" + name + ")", placeId, lat, lng);
+            venueItem = new VenueItem(1,1, "", address + " (" + name + ")", placeId, lat, lng);
             venueItemList.add(venueItem);
         }
 
@@ -383,20 +429,60 @@ public class ShowVenueActivity extends FragmentActivity implements ActionBar.Tab
         VenueItem venueItem;
         venueItemList.clear();
 
-        for(int i = 0, limit = responseArr.length(); i < limit; i++){
-            venueObject = responseArr.getJSONObject(i);
-            venueItem = new VenueItem(
-                    Long.parseLong(venueObject.getString("venue_id")),
-                    venueObject.getString("venue_name"),
-                    venueObject.getString("address"),
-                    venueObject.getString("place_id"),
-                    Double.parseDouble(venueObject.getString("latitude")),
-                    Double.parseDouble(venueObject.getString("longitude"))
-            );
+        int count = responseArr.length() - 1;
 
-            venueItemList.add(venueItem);
+        Vector<ContentValues> contentValuesVector = new Vector<ContentValues>(count);
+        ContentValues contentValues;
+        double latitude, longitude;
+        int venue_id;
+        String name, address, place_id;
+        for(int i = 0; i <= count; i++){
+            venueObject = responseArr.getJSONObject(i);
+            contentValues = new ContentValues();
+
+            latitude = Double.parseDouble(venueObject.getString("latitude"));
+            longitude = Double.parseDouble(venueObject.getString("longitude"));
+            place_id = venueObject.getString("place_id");
+            name = venueObject.getString("venue_name");
+            address = venueObject.getString("address");
+            venue_id = Integer.parseInt(venueObject.getString("venue_id"));
+
+            contentValues.put(VenueEntry.COLUMN_VENUE_ID, venue_id);
+            contentValues.put(VenueEntry.COLUMN_LAT, latitude);
+            contentValues.put(VenueEntry.COLUMN_LNG, longitude);
+            contentValues.put(VenueEntry.COLUMN_PLACE_ID, place_id);
+            contentValues.put(VenueEntry.COLUMN_NAME, name);
+            contentValues.put(VenueEntry.COLUMN_ADDRESS, address);
+            contentValues.put(VenueEntry.COLUMN_CREATED_AT, System.currentTimeMillis());
+            contentValues.put(VenueEntry.COLUMN_MODIFIED_AT, System.currentTimeMillis());
+            contentValues.put(VenueEntry.COLUMN_ACTIVE_STATUS, 1);
+
+            contentValuesVector.add(contentValues);
+
+//            venueItem = new VenueItem(
+//                    Long.parseLong(venueObject.getString("venue_id")),
+//                    name,
+//                    address,
+//                    place_id,
+//                    latitude,
+//                    longitude
+//            );
+
+//            venueItemList.add(venueItem);
         }
 
+        int numOfRowsInserted = 0;
+
+        if ( contentValuesVector.size() > 0 ) {
+            ContentValues [] contentValuesArr = new ContentValues[contentValuesVector.size()];
+            contentValuesVector.toArray(contentValuesArr);
+            numOfRowsInserted = getContentResolver().bulkInsert(
+                    VenueEntry.CONTENT_URI,
+                    contentValuesArr
+            );
+        }
+
+        Log.i(LOG_TAG, "Number of VENUES inserted ===> " + numOfRowsInserted);
         venueItemList = filterVenueByProximity(venueItemList, 50);
         spinnerLayout.setVisibility(View.GONE);
         finishInitialization();
@@ -413,16 +499,16 @@ public class ShowVenueActivity extends FragmentActivity implements ActionBar.Tab
 
         for(int i = 0, limit = responseArr.length(); i < limit; i++){
             venueObject = responseArr.getJSONObject(i);
-            venueItem = new VenueItem(
-                    Long.parseLong(venueObject.getString("venue_id")),
-                    venueObject.getString("venue_name"),
-                    venueObject.getString("address"),
-                    venueObject.getString("place_id"),
-                    Double.parseDouble(venueObject.getString("latitude")),
-                    Double.parseDouble(venueObject.getString("longitude"))
-            );
+//            venueItem = new VenueItem(
+//                    Long.parseLong(venueObject.getString("venue_id")),
+//                    venueObject.getString("venue_name"),
+//                    venueObject.getString("address"),
+//                    venueObject.getString("place_id"),
+//                    Double.parseDouble(venueObject.getString("latitude")),
+//                    Double.parseDouble(venueObject.getString("longitude"))
+//            );
 
-            venueItemList.add(venueItem);
+//            venueItemList.add(venueItem);
         }
 
         venueItemList = filterVenueByProximity(venueItemList, 50);
@@ -454,7 +540,7 @@ public class ShowVenueActivity extends FragmentActivity implements ActionBar.Tab
 
         VenueItem venueItem;
         for (int i = 0; i < 10; i++){
-            venueItem = new VenueItem(1, "Lecture Theatre Name", "Address", "adfadff", 5.23411, 9.1234);
+            venueItem = new VenueItem(1, 1, "Lecture Theatre Name", "Address", "adfadff", 5.23411, 9.1234);
             venueItemList.add(venueItem);
         }
 
@@ -474,18 +560,6 @@ public class ShowVenueActivity extends FragmentActivity implements ActionBar.Tab
 
     }
 
-    public void loadVenues(){
-
-    }
-
-    public void loadLeaders(){
-
-    }
-
-    public void loadMoves(){
-
-    }
-
     public void fetchVenueByTextSearch(){
         fetchDataTask = new FetchDataTask(this, spinnerLayout);
         radius = 50;
@@ -501,10 +575,20 @@ public class ShowVenueActivity extends FragmentActivity implements ActionBar.Tab
     }
 
     public void fetchLeaders(){
+        int userId = preferenceManager.getUserId();
+        if (userId != -1){
+            fetchDataTask = new FetchDataTask(this, spinnerLayout);
+            fetchDataTask.execute(Utility.USER_URL + '/' + userId);
+        }
 
     }
 
     public void fetchMoves(){
+        int userId = preferenceManager.getUserId();
+        if (userId != -1){
+            fetchDataTask = new FetchDataTask(this, spinnerLayout);
+            fetchDataTask.execute(Utility.CHECKING_URL + '/' + userId);
+        }
 
     }
 
@@ -539,5 +623,10 @@ public class ShowVenueActivity extends FragmentActivity implements ActionBar.Tab
     public void onConnectionFailed(ConnectionResult connectionResult) {
 
         Log.i(LOG_TAG, "Connection Failed");
+    }
+
+    @Override
+    public Context getContext() {
+        return this;
     }
 }

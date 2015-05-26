@@ -52,6 +52,8 @@
 
     <string name="venue_heading_dummy_text">Chemical Engineering LT</string>
     <string name="recent_activities_text">Recent Activities</string>
+    <string name="venue_check_in_btn_label">Check In</string>
+    <string name="venue_check_out_btn_label">Check Out</string>
 
     <string-array name="entry_venue_view_options">
         <item>List View</item>

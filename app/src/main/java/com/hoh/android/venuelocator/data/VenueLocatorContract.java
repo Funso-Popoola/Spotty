@@ -6,6 +6,8 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 import android.text.format.Time;
 
+import java.util.Locale;
+
 /**
  * Created by funso on 3/4/15.
  */
@@ -14,10 +16,10 @@ public class VenueLocatorContract {
     public final static String CONTENT_AUTHORITY = "com.hoh.android.venuelocator";
     public final static Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
-    public final static String PATH_LOCATION = "location";
     public final static String PATH_VENUE = "venue";
     public final static String PATH_USER = "user";
     public final static String PATH_CHECKING = "checking";
+    public final static String PATH_FOLLOWER_LEADER = "follower_leader";
 
     public static long normalizeDate(long startDate){
         Time time = new Time();
@@ -27,46 +29,50 @@ public class VenueLocatorContract {
     }
 
 
-    public static class LocationEntry implements BaseColumns{
-
-        public final static String TABLE_NAME = "locations";
-        public final static String COLUMN_LAT = "latitude";
-        public final static String COLUMN_LNG = "longitude";
-        public final static String COLUMN_PLACE_ID = "place_id";
-        public final static String COLUMN_ADDRESS = "address";
-        public final static String COLUMN_CREATED_AT = "created_at";
-        public final static String COLUMN_MODIFIED_AT = "modified_at";
-        public final static String COLUMN_ACTIVE_STATUS = "active_status";
-
-        public final static Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
-                .appendPath(PATH_LOCATION)
-                .build();
-
-        public final static String CONTENT_TYPE =
-                ContentResolver.CURSOR_DIR_BASE_TYPE
-                + "/" + CONTENT_AUTHORITY
-                + "/" + PATH_LOCATION;
-
-        public final static String CONTENT_ITEM_TYPE =
-                ContentResolver.CURSOR_ITEM_BASE_TYPE
-                        + "/" + CONTENT_AUTHORITY
-                        + "/" + PATH_LOCATION;
-
-        // location/:id
-        public static Uri buildLocationUriWithId(long id){
-            return ContentUris.withAppendedId(CONTENT_URI, id);
-        }
-
-        public static long getLocationIdFromLocationUri(Uri uri){
-            return Long.parseLong(uri.getPathSegments().get(1));
-        }
-
-    }
+//    public static class LocationEntry implements BaseColumns{
+//
+//        public final static String TABLE_NAME = "locations";
+//        public final static String COLUMN_LAT = "latitude";
+//        public final static String COLUMN_LNG = "longitude";
+//        public final static String COLUMN_PLACE_ID = "place_id";
+//        public final static String COLUMN_ADDRESS = "address";
+//        public final static String COLUMN_CREATED_AT = "created_at";
+//        public final static String COLUMN_MODIFIED_AT = "modified_at";
+//        public final static String COLUMN_ACTIVE_STATUS = "active_status";
+//
+//        public final static Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
+//                .appendPath(PATH_LOCATION)
+//                .build();
+//
+//        public final static String CONTENT_TYPE =
+//                ContentResolver.CURSOR_DIR_BASE_TYPE
+//                + "/" + CONTENT_AUTHORITY
+//                + "/" + PATH_LOCATION;
+//
+//        public final static String CONTENT_ITEM_TYPE =
+//                ContentResolver.CURSOR_ITEM_BASE_TYPE
+//                        + "/" + CONTENT_AUTHORITY
+//                        + "/" + PATH_LOCATION;
+//
+//        // location/:id
+//        public static Uri buildLocationUriWithId(long id){
+//            return ContentUris.withAppendedId(CONTENT_URI, id);
+//        }
+//
+//        public static long getLocationIdFromLocationUri(Uri uri){
+//            return Long.parseLong(uri.getPathSegments().get(1));
+//        }
+//
+//    }
 
     public static class VenueEntry implements BaseColumns {
 
         public final static String TABLE_NAME = "venues";
-        public final static String COLUMN_LOC_ID = "location_id";
+        public final static String COLUMN_VENUE_ID = "venues";
+        public final static String COLUMN_LAT = "latitude";
+        public final static String COLUMN_LNG = "longitude";
+        public final static String COLUMN_PLACE_ID = "place_id";
+        public final static String COLUMN_ADDRESS = "address";
         public final static String COLUMN_NAME = "venue_name";
         public final static String COLUMN_CREATED_AT = "created_at";
         public final static String COLUMN_MODIFIED_AT = "modified_at";
@@ -118,11 +124,11 @@ public class VenueLocatorContract {
     public static class UserEntry implements BaseColumns{
 
         public final static String TABLE_NAME = "users";
+        public final static String COLUMN_USER_ID = "user_id";
         public final static String COLUMN_USERNAME = "username";
         public final static String COLUMN_EMAIL = "user_email";
         public final static String COLUMN_IMG_URL = "user_image_url";
         public final static String COLUMN_GOOGLE_PLUS_PROFILE = "google_plus_profile";
-        public final static String COLUMN_IS_FOLLOWED = "is_followed";
         public final static String COLUMN_CREATED_AT = "created_at";
         public final static String COLUMN_MODIFIED_AT = "modified_at";
         public final static String COLUMN_ACTIVE_STATUS = "active_status";
@@ -147,17 +153,66 @@ public class VenueLocatorContract {
         }
 
         // user/followed/:follower_id
-        public static Uri buildUserUriWithFollowerId(long followerId){
-            return CONTENT_URI.buildUpon().appendPath("followed")
-                    .appendPath(Long.toString(followerId)).build();
-        }
+//        public static Uri buildUserUriWithIsFollowed(int isFollowed){
+//            return CONTENT_URI.buildUpon().appendPath("followed")
+//                    .appendPath(isFollowed + "").build();
+//        }
 
         public static long getUserIdFromUserUri(Uri uri){
             return Long.parseLong(uri.getPathSegments().get(1));
         }
 
-        public static long getFollowerIdFromUserUri(Uri uri){
-            return Long.parseLong(uri.getPathSegments().get(2));
+//        public static long getIsFollowedFromUserUri(Uri uri){
+//            return Integer.parseInt(uri.getPathSegments().get(2));
+//        }
+    }
+
+    public static class LeaderFollowerEntry implements BaseColumns{
+
+        public final static String TABLE_NAME = "leader_follower";
+        public final static String COLUMN_LEADER_ID = "leader_id";
+        public final static String COLUMN_FOLLOWER_ID = "follower_id";
+        public final static String COLUMN_CREATED_AT = "created_at";
+        public final static String COLUMN_MODIFIED_AT = "modified_at";
+        public final static String COLUMN_ACTIVE_STATUS = "active_status";
+
+        public final static Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
+                .appendPath(PATH_FOLLOWER_LEADER)
+                .build();
+
+        public final static String CONTENT_TYPE =
+                ContentResolver.CURSOR_DIR_BASE_TYPE
+                        + "/" + CONTENT_AUTHORITY
+                        + "/" + PATH_FOLLOWER_LEADER;
+
+        public final static String CONTENT_ITEM_TYPE =
+                ContentResolver.CURSOR_ITEM_BASE_TYPE
+                        + "/" + CONTENT_AUTHORITY
+                        + "/" + PATH_FOLLOWER_LEADER;
+
+        // follower_leader/:id
+        public static Uri buildFollowerLeaderUriWithId(long id){
+            return ContentUris.withAppendedId(CONTENT_URI, id);
+        }
+
+        // follower_leader/followed/:follower_id
+        public static Uri buildFollowerLeaderUriWithFollowerId(long followerId){
+            return CONTENT_URI.buildUpon().appendPath("followed")
+                    .appendPath(Long.toString(followerId)).build();
+        }
+
+        // follower_leader/not_followed/:follower_id
+        public static Uri buildFollowerLeaderUriWithNotFollowerId(long followerId){
+            return CONTENT_URI.buildUpon().appendPath("not_followed")
+                    .appendPath(Long.toString(followerId)).build();
+        }
+
+        public static long getIdFromFollowerLeaderUri(Uri uri){
+            return Long.parseLong(uri.getPathSegments().get(1));
+        }
+
+        public static long getFollowerIdFromFollowerLeaderUri(Uri uri){
+            return Integer.parseInt(uri.getPathSegments().get(2));
         }
     }
 

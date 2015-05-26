@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
  */
 public class VenueItem {
 
+    public static String VENUE_INTERNAL_ID = "_id";
     public static String VENUE_ID = "venue_id";
     public static String VENUE_NAME = "venue_name";
     public static String VENUE_ADDRESS = "address";
@@ -16,13 +17,15 @@ public class VenueItem {
     public static String VENUE_LNG = "lng";
 
     private long id;
+    private long internal_id;
     private String name;
     private String address;
     private String placeId;
     private double latitude;
     private double longitude;
 
-    public VenueItem(long id, String name, String address, String placeId, double latitude, double longitude){
+    public VenueItem(long internalId,long id, String name, String address, String placeId, double latitude, double longitude){
+        this.internal_id = internalId;
         this.id = id;
         this.name = name;
         this.address = address;
@@ -32,7 +35,8 @@ public class VenueItem {
     }
 
     public VenueItem(Intent intent){
-        this(intent.getLongExtra(VENUE_ID, -1),
+        this(intent.getLongExtra(VENUE_INTERNAL_ID, -1),
+                intent.getLongExtra(VENUE_ID, -1),
                 intent.getStringExtra(VENUE_NAME),
                 intent.getStringExtra(VENUE_ADDRESS),
                 intent.getStringExtra(VENUE_PLACE_ID),
@@ -82,6 +86,14 @@ public class VenueItem {
 
     public String[] toStringArray(){
         return new String[]{this.address, this.placeId, this.latitude + "", this.longitude + ""};
+    }
+
+    public long getInternal_id() {
+        return internal_id;
+    }
+
+    public void setInternal_id(long internal_id) {
+        this.internal_id = internal_id;
     }
 
     public long getId() {

@@ -15,6 +15,4 @@ public class SettingsActivity extends PreferenceActivity {
         addPreferencesFromResource(R.xml.pref);
     }
 
-
-
 }

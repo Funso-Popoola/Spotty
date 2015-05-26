@@ -16,16 +16,19 @@ import java.util.List;
 public class ShowVenuePagerAdapter extends FragmentStatePagerAdapter {
 
 
-    private List<VenueItem> venueItems;
-    private List<MovesItem> movesItems;
-    private List<RecentVenueActivityItem> followedCheckings;
+    private VenueListAdapter venueListAdapter;
+    private MovesListAdapter movesListAdapter;
+    private FollowedCheckingsListAdapter followedCheckingsListAdapter;
 
-    public ShowVenuePagerAdapter(FragmentManager fragmentManager, List<VenueItem> venueItems, List<MovesItem> movesItems, List<RecentVenueActivityItem> followedCheckings){
+    public ShowVenuePagerAdapter(FragmentManager fragmentManager,
+                                 VenueListAdapter venueListAdapter,
+                                 MovesListAdapter movesListAdapter,
+                                 FollowedCheckingsListAdapter followedCheckingsListAdapter){
 
         super(fragmentManager);
-        this.venueItems = venueItems;
-        this.movesItems = movesItems;
-        this.followedCheckings = followedCheckings;
+        this.venueListAdapter = venueListAdapter;
+        this.movesListAdapter = movesListAdapter;
+        this.followedCheckingsListAdapter = followedCheckingsListAdapter;
 
     }
 
@@ -37,11 +40,11 @@ public class ShowVenuePagerAdapter extends FragmentStatePagerAdapter {
     public Fragment getItem(int position) {
         switch (position){
             case 0:
-                return ShowVenueFragment.newInstance(venueItems);
+                return ShowVenueFragment.newInstance(venueListAdapter);
             case 1:
-                return MovesFragment.newInstance(movesItems);
+                return MovesFragment.newInstance(movesListAdapter);
             case 2:
-                return FollowedCheckingsFragment.newInstance(followedCheckings);
+                return FollowedCheckingsFragment.newInstance(followedCheckingsListAdapter);
 
         }
         return null;

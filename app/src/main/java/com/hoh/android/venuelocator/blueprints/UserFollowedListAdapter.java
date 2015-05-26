@@ -1,10 +1,12 @@
 package com.hoh.android.venuelocator.blueprints;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.CursorAdapter;
 import android.widget.TextView;
 
 import com.hoh.android.venuelocator.R;
@@ -12,63 +14,46 @@ import com.hoh.android.venuelocator.R;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.hoh.android.venuelocator.data.VenueLocatorContract.UserEntry;
+import com.hoh.android.venuelocator.data.VenueLocatorContract.LeaderFollowerEntry;
+
 /**
  * Created by funso on 3/4/15.
  */
-public class UserFollowedListAdapter extends BaseAdapter {
+public class UserFollowedListAdapter extends CursorAdapter {
 
     private Context context;
-    private List<UserFollowedItem> userFollowedItems;
 
-    public UserFollowedListAdapter(Context context){
+    public UserFollowedListAdapter(Context context, Cursor cursor, int flag){
+        super(context, cursor, flag);
         this.context = context;
-        this.userFollowedItems = new ArrayList<>();
-    }
-
-    public void add(UserFollowedItem item){
-        if (item != null){
-            userFollowedItems.add(item);
-            notifyDataSetChanged();
-        }
-
-    }
-
-    public void clear(){
-        userFollowedItems.clear();
-        notifyDataSetChanged();
     }
 
     @Override
-    public int getCount() {
-        return userFollowedItems.size();
-    }
-
-    @Override
-    public Object getItem(int position) {
-        return userFollowedItems.get(position);
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return position;
-    }
-
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-
-        UserFollowedItem userFollowedItem = userFollowedItems.get(position);
-        View view = convertView;
-
-        if (view == null){
-            view = (LayoutInflater.from(context)).inflate(R.layout.user_followed_item, parent, false);
-        }
-
-        final TextView fullNameTextView = (TextView) view.findViewById(R.id.full_name_tv);
-        final TextView emailTextView = (TextView) view.findViewById(R.id.email_tv);
-
-        fullNameTextView.setText(userFollowedItem.getFullName());
-        emailTextView.setText(userFollowedItem.getEmail());
-
+    public View newView(Context context, Cursor cursor, ViewGroup parent) {
+        View view = (LayoutInflater.from(context)).inflate(R.layout.user_followed_item, parent, false);
+        UserFollowedViewHolder viewHolder = new UserFollowedViewHolder(view, context);
+        view.setTag(viewHolder);
         return view;
     }
+
+    @Override
+    public void bindView(View view, final Context context, Cursor cursor) {
+        UserFollowedViewHolder viewHolder = (UserFollowedViewHolder) view.getTag();
+        viewHolder.downloadUserImage(cursor.getString(cursor.getColumnIndex(UserEntry.COLUMN_IMG_URL)));
+        viewHolder.fullNameTextView.setText(cursor.getString(cursor.getColumnIndex(UserEntry.COLUMN_USERNAME)));
+        viewHolder.emailTextView.setText(cursor.getString(cursor.getColumnIndex(UserEntry.COLUMN_EMAIL)));
+        final long rowId = cursor.getLong(cursor.getColumnIndex(LeaderFollowerEntry.TABLE_NAME + "." + LeaderFollowerEntry._ID));
+        viewHolder.removeLeaderBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                context.getContentResolver().delete(
+                        LeaderFollowerEntry.buildFollowerLeaderUriWithId(rowId),
+                        null,
+                        null
+                );
+            }
+        });
+    }
+
 }

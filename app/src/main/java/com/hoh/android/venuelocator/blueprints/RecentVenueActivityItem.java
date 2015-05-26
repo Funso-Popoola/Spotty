@@ -62,4 +62,11 @@ public class RecentVenueActivityItem {
         else
             return "Checked Out";
     }
+
+    public static String getActivity(Activity activity){
+        if (activity == Activity.CHECK_IN)
+            return "Checked In";
+        else
+            return "Checked Out";
+    }
 }
