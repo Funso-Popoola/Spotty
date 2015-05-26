@@ -251,6 +251,13 @@ public class ShowVenueActivity extends FragmentActivity implements ActionBar.Tab
             googleApiClient.connect();
         }
 
+//        if (!initialized){
+            spinnerLayout.setVisibility(View.VISIBLE);
+//        }
+        fetchAllVenues();
+        fetchMoves();
+        fetchLeaders();
+
     }
 
     @Override
@@ -297,17 +304,17 @@ public class ShowVenueActivity extends FragmentActivity implements ActionBar.Tab
         viewPager.setCurrentItem(position);
         switch (position){
             case NEAR_BY:
-                fetchAllVenues();
+//                fetchAllVenues();
 //                getSupportLoaderManager().restartLoader(VENUE_LOADER_ID, null, this);
                 spinnerLayout.setVisibility(View.GONE);
                 break;
             case MOVES:
-                fetchMoves();
+//                fetchMoves();
 //                getSupportLoaderManager().restartLoader(VENUE_LOADER_ID, null, this);
                 spinnerLayout.setVisibility(View.GONE);
                 break;
             case FOLLOWED:
-                fetchLeaders();
+//                fetchLeaders();
 //                getSupportLoaderManager().restartLoader(VENUE_LOADER_ID, null, this);
                 spinnerLayout.setVisibility(View.GONE);
                 break;

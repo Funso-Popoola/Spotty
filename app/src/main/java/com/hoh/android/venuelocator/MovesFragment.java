@@ -33,7 +33,7 @@ public class MovesFragment extends Fragment implements LoaderManager.LoaderCallb
     public final static String[] MOVES_COLUMNS = {
             VenueLocatorContract.CheckingEntry.TABLE_NAME + "." + VenueLocatorContract.CheckingEntry._ID,
             VenueLocatorContract.CheckingEntry.TABLE_NAME + "." + VenueLocatorContract.CheckingEntry.COLUMN_CHECK_TYPE,
-            VenueLocatorContract.VenueEntry.TABLE_NAME + "." + VenueLocatorContract.VenueEntry.COLUMN_ADDRESS,
+            VenueLocatorContract.VenueEntry.TABLE_NAME + "." + VenueLocatorContract.VenueEntry.COLUMN_NAME,
             VenueLocatorContract.CheckingEntry.TABLE_NAME + "." + VenueLocatorContract.CheckingEntry.COLUMN_CREATED_AT
     };
 

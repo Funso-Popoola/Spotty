@@ -38,15 +38,15 @@ public class FollowedCheckingsListAdapter extends CursorAdapter {
             FollowedCheckingsViewHolder viewHolder = (FollowedCheckingsViewHolder) view.getTag();
 
             viewHolder.downloadUserImage(cursor.getString(
-                    cursor.getColumnIndex(UserEntry.TABLE_NAME + "." + UserEntry.COLUMN_IMG_URL)));
+                    cursor.getColumnIndex(UserEntry.COLUMN_IMG_URL)));
             viewHolder.userActivityTextView.setText(cursor.getString(
-                    cursor.getColumnIndex(VenueEntry.TABLE_NAME + "." + VenueEntry.COLUMN_ADDRESS)
+                    cursor.getColumnIndex(VenueEntry.COLUMN_ADDRESS)
             ));
             viewHolder.userActivityTextView.setText(cursor.getString(
-                    cursor.getColumnIndex(CheckingEntry.TABLE_NAME + "." + CheckingEntry.COLUMN_CHECK_TYPE)
+                    cursor.getColumnIndex(CheckingEntry.COLUMN_CHECK_TYPE)
             ));
             viewHolder.userActivityTimeStamp.setText(cursor.getString(
-                    cursor.getColumnIndex(CheckingEntry.TABLE_NAME + "." + CheckingEntry.COLUMN_CREATED_AT)
+                    cursor.getColumnIndex(CheckingEntry.COLUMN_CREATED_AT)
             ));
         }
 

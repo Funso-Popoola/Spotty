@@ -16,12 +16,12 @@ import java.net.URL;
  */
 public class DownloadImageTask extends AsyncTask<URL, Void, Bitmap> {
 
-    private CustomPreferenceManager preferenceManager;
+//    private CustomPreferenceManager preferenceManager;
     private OnDownloadFinished callback;
     private URL url;
 
     public DownloadImageTask(Context context, OnDownloadFinished callback){
-        this.preferenceManager = new CustomPreferenceManager(context);
+//        this.preferenceManager = new CustomPreferenceManager(context);
         this.callback = callback;
     }
 

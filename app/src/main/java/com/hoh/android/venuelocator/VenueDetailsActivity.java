@@ -293,12 +293,12 @@ public class VenueDetailsActivity extends FragmentActivity implements
 
 //            long newUserId = UserEntry.getUserIdFromUserUri(userUri);
 
-            item = new RecentVenueActivityItem(
-                    venueItem,
-                    checkingObject.getString("modified_at"),
-                    actor,
-                    RecentVenueActivityItem.stringToActivity(checkingObject.getString("checking_type"))
-            );
+//            item = new RecentVenueActivityItem(
+//                    venueItem,
+//                    checkingObject.getString("modified_at"),
+//                    actor,
+//                    RecentVenueActivityItem.stringToActivity(checkingObject.getString("checking_type"))
+//            );
             checkingType = checkingObject.getString("checking_type");
 
             checkingContentValues = new ContentValues();
@@ -316,7 +316,7 @@ public class VenueDetailsActivity extends FragmentActivity implements
 
             Log.i(LOG_TAG, "Newly inserted CHECKING while fetching venue recent activities ===> " + checkingUri);
 
-            recentVenueActivityItems.add(item);
+//            recentVenueActivityItems.add(item);
         }
 
 //        setProgressBarIndeterminateVisibility(false);

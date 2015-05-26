@@ -46,7 +46,7 @@ public class VenueDbHelper extends SQLiteOpenHelper {
                                 + UserEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                                 + UserEntry.COLUMN_USER_ID + " INTEGER NOT NULL, "
                                 + UserEntry.COLUMN_USERNAME + " TEXT NOT NULL, "
-                                + UserEntry.COLUMN_EMAIL + " TEXT UNIQUE NOT NULL, "
+                                + UserEntry.COLUMN_EMAIL + " TEXT NOT NULL, "
                                 + UserEntry.COLUMN_IMG_URL + " TEXT NOT NULL, "
                                 + UserEntry.COLUMN_GOOGLE_PLUS_PROFILE + " TEXT NOT NULL, "
                                 + UserEntry.COLUMN_CREATED_AT + " INTEGER NOT NULL, "

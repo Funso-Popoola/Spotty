@@ -196,15 +196,15 @@ public class VenueLocatorContract {
         }
 
         // follower_leader/followed/:follower_id
-        public static Uri buildFollowerLeaderUriWithFollowerId(long followerId){
+        public static Uri buildFollowerLeaderUriWithFollowerId(int followerId){
             return CONTENT_URI.buildUpon().appendPath("followed")
-                    .appendPath(Long.toString(followerId)).build();
+                    .appendPath(Integer.toString(followerId)).build();
         }
 
         // follower_leader/not_followed/:follower_id
-        public static Uri buildFollowerLeaderUriWithNotFollowerId(long followerId){
+        public static Uri buildFollowerLeaderUriWithNotFollowerId(int followerId){
             return CONTENT_URI.buildUpon().appendPath("not_followed")
-                    .appendPath(Long.toString(followerId)).build();
+                    .appendPath(Integer.toString(followerId)).build();
         }
 
         public static long getIdFromFollowerLeaderUri(Uri uri){

@@ -68,6 +68,9 @@ public class VenueProvider extends ContentProvider{
     private final static String checkingFollowedSelection =
             CheckingEntry.TABLE_NAME + "." + CheckingEntry.COLUMN_CHECKER_ID + " = ?";
 
+    private final static String userCheckingFollowedSelection =
+            LeaderFollowerEntry.TABLE_NAME + "." + LeaderFollowerEntry.COLUMN_FOLLOWER_ID + " = ?";
+
     // SQLQueryBuilders
     private static SQLiteQueryBuilder venueLocationQueryBuilder;
     private static SQLiteQueryBuilder checkingVenueQueryBuilder;
@@ -75,6 +78,7 @@ public class VenueProvider extends ContentProvider{
     private static SQLiteQueryBuilder userCheckingQueryBuilder;
 
     private static SQLiteQueryBuilder userFollowedQueryBuilder;
+    private static SQLiteQueryBuilder userFollowedCheckingsQueryBuilder;
 
     static {
         venueLocationQueryBuilder = new SQLiteQueryBuilder();
@@ -83,6 +87,7 @@ public class VenueProvider extends ContentProvider{
         userCheckingQueryBuilder = new SQLiteQueryBuilder();
 
         userFollowedQueryBuilder = new SQLiteQueryBuilder();
+        userFollowedCheckingsQueryBuilder = new SQLiteQueryBuilder();
 
         checkingVenueQueryBuilder.setTables(
                 CheckingEntry.TABLE_NAME + " INNER JOIN " + VenueEntry.TABLE_NAME
@@ -109,6 +114,18 @@ public class VenueProvider extends ContentProvider{
                 LeaderFollowerEntry.TABLE_NAME + " INNER JOIN " + UserEntry.TABLE_NAME
                 + " ON " + LeaderFollowerEntry.TABLE_NAME + "." + LeaderFollowerEntry.COLUMN_FOLLOWER_ID + " = "
                 + UserEntry.TABLE_NAME + "." + UserEntry.COLUMN_USER_ID
+        );
+
+        userFollowedCheckingsQueryBuilder.setTables(
+                LeaderFollowerEntry.TABLE_NAME + " INNER JOIN " + UserEntry.TABLE_NAME
+                + " ON " + LeaderFollowerEntry.TABLE_NAME + "." + LeaderFollowerEntry.COLUMN_FOLLOWER_ID + " = "
+                + UserEntry.TABLE_NAME + "." + UserEntry.COLUMN_USER_ID
+                + " INNER JOIN " + CheckingEntry.TABLE_NAME
+                + " ON " + CheckingEntry.TABLE_NAME + "." + CheckingEntry.COLUMN_CHECKER_ID + " = "
+                + UserEntry.TABLE_NAME + "." + UserEntry.COLUMN_USER_ID
+                + " INNER JOIN " + VenueEntry.TABLE_NAME
+                + " ON " + VenueEntry.TABLE_NAME + "." + VenueEntry.COLUMN_VENUE_ID + " = "
+                + CheckingEntry.TABLE_NAME + "." + CheckingEntry.COLUMN_VENUE_ID
         );
     }
 
@@ -216,10 +233,10 @@ public class VenueProvider extends ContentProvider{
         final SQLiteDatabase database = dbHelper.getReadableDatabase();
         long id = CheckingEntry.getSecondIdFromCheckingUri(uri);
 
-        return checkingVenueLocationQueryBuilder.query(
+        return userFollowedCheckingsQueryBuilder.query(
                 database,
                 projection,
-                checkingFollowedSelection,
+                userCheckingFollowedSelection,
                 new String[]{Long.toString(id)},
                 null,
                 null,

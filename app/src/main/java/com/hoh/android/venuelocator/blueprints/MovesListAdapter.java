@@ -45,11 +45,11 @@ public class MovesListAdapter extends CursorAdapter{
         if (cursor != null && !cursor.isClosed()){
             MovesViewHolder viewHolder = (MovesViewHolder) view.getTag();
             viewHolder.dateTextView.setText(cursor.getString(
-                    cursor.getColumnIndex(CheckingEntry.TABLE_NAME + "." + CheckingEntry.COLUMN_CREATED_AT)));
+                    cursor.getColumnIndex(CheckingEntry.COLUMN_CREATED_AT)));
             viewHolder.activityTextView.setText(cursor.getString(
-                    cursor.getColumnIndex(CheckingEntry.TABLE_NAME + "." + CheckingEntry.COLUMN_CHECK_TYPE)));
+                    cursor.getColumnIndex(CheckingEntry.COLUMN_CHECK_TYPE)));
             viewHolder.locationTextView.setText(cursor.getString(
-                    cursor.getColumnIndex(VenueEntry.TABLE_NAME + "." + VenueEntry.COLUMN_ADDRESS)));
+                    cursor.getColumnIndex(VenueEntry.COLUMN_NAME)));
         }
 
     }
