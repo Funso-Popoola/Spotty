@@ -113,7 +113,7 @@ public class ChooseUserToFollowFragment extends Fragment implements LoaderManage
                     null,
                     null,
                     null,
-                    null
+                    VenueLocatorContract.LeaderFollowerEntry.TABLE_NAME + "." + VenueLocatorContract.LeaderFollowerEntry.COLUMN_CREATED_AT + " DESC"
             );
         }
         else{

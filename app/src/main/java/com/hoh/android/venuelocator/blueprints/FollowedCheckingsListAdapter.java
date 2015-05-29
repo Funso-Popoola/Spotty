@@ -45,8 +45,8 @@ public class FollowedCheckingsListAdapter extends CursorAdapter {
             viewHolder.userActivityTextView.setText(cursor.getString(
                     cursor.getColumnIndex(CheckingEntry.COLUMN_CHECK_TYPE)
             ));
-            viewHolder.userActivityTimeStamp.setText(cursor.getString(
-                    cursor.getColumnIndex(CheckingEntry.COLUMN_CREATED_AT)
+            viewHolder.userActivityTimeStamp.setText(
+                    Utility.getFriendlyDayString(context, Long.parseLong(cursor.getString(cursor.getColumnIndex(CheckingEntry.COLUMN_CREATED_AT)))
             ));
         }
 

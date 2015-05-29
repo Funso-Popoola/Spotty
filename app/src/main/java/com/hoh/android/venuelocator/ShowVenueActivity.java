@@ -252,7 +252,7 @@ public class ShowVenueActivity extends FragmentActivity implements ActionBar.Tab
         }
 
 //        if (!initialized){
-            spinnerLayout.setVisibility(View.VISIBLE);
+//            spinnerLayout.setVisibility(View.VISIBLE);
 //        }
         fetchAllVenues();
         fetchMoves();

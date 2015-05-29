@@ -122,7 +122,7 @@ public class MovesFragment extends Fragment implements LoaderManager.LoaderCallb
                     MOVES_COLUMNS,
                     null,
                     null,
-                    null
+                    VenueLocatorContract.CheckingEntry.TABLE_NAME + "." + VenueLocatorContract.CheckingEntry.COLUMN_CREATED_AT + " DESC"
             );
         }
         else{

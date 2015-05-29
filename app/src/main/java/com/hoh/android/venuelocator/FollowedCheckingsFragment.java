@@ -135,7 +135,7 @@ public class FollowedCheckingsFragment extends Fragment implements LoaderManager
                     FOLLOWED_COLUMNS,
                     null,
                     null,
-                    null
+                    VenueLocatorContract.VenueEntry.TABLE_NAME + "." + VenueLocatorContract.CheckingEntry.COLUMN_CREATED_AT + " DESC"
             );
         }
         else{

@@ -44,12 +44,11 @@ public class MovesListAdapter extends CursorAdapter{
     public void bindView(View view, Context context, Cursor cursor) {
         if (cursor != null && !cursor.isClosed()){
             MovesViewHolder viewHolder = (MovesViewHolder) view.getTag();
-            viewHolder.dateTextView.setText(cursor.getString(
-                    cursor.getColumnIndex(CheckingEntry.COLUMN_CREATED_AT)));
-            viewHolder.activityTextView.setText(cursor.getString(
-                    cursor.getColumnIndex(CheckingEntry.COLUMN_CHECK_TYPE)));
-            viewHolder.locationTextView.setText(cursor.getString(
-                    cursor.getColumnIndex(VenueEntry.COLUMN_NAME)));
+            viewHolder.dateTextView.setText(
+                    Utility.getFriendlyDayString(context, Long.parseLong(cursor.getString(cursor.getColumnIndex(CheckingEntry.COLUMN_CREATED_AT))))
+            );
+            viewHolder.activityTextView.setText(cursor.getString(cursor.getColumnIndex(CheckingEntry.COLUMN_CHECK_TYPE)));
+            viewHolder.locationTextView.setText(cursor.getString(cursor.getColumnIndex(VenueEntry.COLUMN_NAME)));
         }
 
     }

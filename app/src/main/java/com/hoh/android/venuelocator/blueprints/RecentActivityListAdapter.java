@@ -44,7 +44,6 @@ public class RecentActivityListAdapter extends CursorAdapter{
                 cursor.getColumnIndex(UserEntry.COLUMN_IMG_URL)));
         viewHolder.activityTextView.setText(
                 cursor.getString(cursor.getColumnIndex(CheckingEntry.COLUMN_CHECK_TYPE)));
-        viewHolder.activityTimeTextView.setText(cursor.getString(
-                cursor.getColumnIndex(CheckingEntry.COLUMN_CREATED_AT)));
+        viewHolder.activityTimeTextView.setText(Utility.getFriendlyDayString(context, Long.parseLong(cursor.getString(cursor.getColumnIndex(CheckingEntry.COLUMN_CREATED_AT)))));
     }
 }
